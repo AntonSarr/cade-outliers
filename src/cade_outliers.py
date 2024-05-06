@@ -85,6 +85,8 @@ class CADEOutliers():
             # calculate uniform probability density
             P_A = 1
             for s in X.max(axis=0) - X.min(axis=0):
+                if s == 0:
+                    s = 1
                 P_A /= s
             P_A = np.array([P_A] * X.shape[0])
         elif self.A_dist == 'grid':
@@ -97,17 +99,20 @@ class CADEOutliers():
             # calculate uniform probability density
             P_A = 1 
             for s in X.max(axis=0) - X.min(axis=0):
+                if s == 0:
+                    s = 1
                 P_A /= s
             P_A = np.array([P_A] * X.shape[0])
         else:
             attrs = None
-        
+            
         A = self._generate_A(self.A_dist, attrs)
         
         combined_data = np.vstack([A, X])
         target = np.hstack([np.zeros(X.shape[0]), np.ones(A.shape[0])])
         
         X_train, X_test, y_train, y_test = train_test_split(combined_data, target, test_size=0.33)
+        
         self.classifier.fit(X_train, y_train)
         
         predictions = self.classifier.predict_proba(X)[:, 0]
